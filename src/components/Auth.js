@@ -7,44 +7,34 @@ export default function App() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState(''); 
-  const [user, setUser] = useState('');
-  const [nome, setNome] = useState('');
- 
+  
 
   async function cadastrar(){
     await firebase.auth().createUserWithEmailAndPassword(email, password)
     .then((value)=>{
-      firebase.database().ref('usuarios').child(value.user.uid).set({
-        nome: nome
-      })
-      alert('Usuario cadastrado com sucesso!'); 
-      setNome('');
-      setEmail('');
-      setPassword('');
-       
+      alert('Usuario criado:' + value.user.email);      
     })
-    .catch((error)=>{      
+    .catch((error)=>{
+      if(error.code === 'auth/weak-password'){
+        alert('Sua senha deve ter pelo menos seis caracteres.'); 
+        return;       
+      }
+      if(error.code === 'auth/invalid-email'){
+        alert('E-mail invalido!');
+        return;
+      }
+      else{
         alert('Algo deu errado!')
-        return;      
+        return;
+      }
     })
-    
-  }
+    setEmail('');
+    setPassword('');
 
-  async function logout(){
-    await firebase.auth().signOut();
-    setUser('');
-    alert('Deslogado com sucesso!');
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.texto}>Nome:</Text> 
-      <TextInput
-        style={styles.input}
-        underlineColorAndroid= 'transparent'
-        onChangeText={(texto)=> setNome(texto)}
-        value= {nome}
-      />
       <Text style={styles.texto}>Email:</Text> 
       <TextInput
         style={styles.input}
@@ -55,7 +45,6 @@ export default function App() {
       <Text style={styles.texto}>Password:</Text>
       <TextInput
         style={styles.input}
-        secureTextEntry={true}
         underlineColorAndroid= 'transparent'
         onChangeText={(texto)=> setPassword(texto)}
         value = {password}
@@ -63,7 +52,7 @@ export default function App() {
       <Button
         title= 'Cadastrar'
         onPress={cadastrar}                
-      />       
+      />      
     </View>
   );
 }

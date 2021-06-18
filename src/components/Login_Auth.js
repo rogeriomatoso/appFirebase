@@ -9,27 +9,23 @@ export default function App() {
   const [password, setPassword] = useState(''); 
   const [user, setUser] = useState('');
   const [nome, setNome] = useState('');
- 
+  
 
-  async function cadastrar(){
-    await firebase.auth().createUserWithEmailAndPassword(email, password)
+  async function logar(){
+    await firebase.auth().signInWithEmailAndPassword(email, password)
     .then((value)=>{
-      firebase.database().ref('usuarios').child(value.user.uid).set({
-        nome: nome
-      })
-      alert('Usuario cadastrado com sucesso!'); 
-      setNome('');
-      setEmail('');
-      setPassword('');
-       
+      alert('Bem-vindo(a):' + value.user.email); 
+      setUser(value.user.email); 
+      return; 
     })
     .catch((error)=>{      
         alert('Algo deu errado!')
         return;      
     })
-    
-  }
+    setEmail('');
+    setPassword('');
 
+  }
   async function logout(){
     await firebase.auth().signOut();
     setUser('');
@@ -55,15 +51,30 @@ export default function App() {
       <Text style={styles.texto}>Password:</Text>
       <TextInput
         style={styles.input}
-        secureTextEntry={true}
         underlineColorAndroid= 'transparent'
         onChangeText={(texto)=> setPassword(texto)}
         value = {password}
       />
       <Button
-        title= 'Cadastrar'
-        onPress={cadastrar}                
-      />       
+        title= 'Acessar'
+        onPress={logar}                
+      />      
+      <Text style={{marginTop: 20, marginBottom: 20, fontSize:23, textAlign: 'center'}}>
+        {user}
+      </Text>
+      {user.length > 0 ?
+        (
+        <Button
+          title= 'Sair'
+          onPress={logout}                
+        />  
+        ) 
+        :
+        (    
+          <Text style={{marginTop: 20, marginBottom: 20, fontSize:23, textAlign: 'center'}}>
+            Nenhum Usuario logado.
+         </Text>
+        )} 
     </View>
   );
 }
